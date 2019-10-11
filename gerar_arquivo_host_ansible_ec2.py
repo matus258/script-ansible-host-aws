@@ -68,14 +68,15 @@ if all_hosts:
                 keyname=ins.get('KeyName','')
                 for net in ins['NetworkInterfaces']:
                     if net.get('PrivateIpAddress'):
-                        host_ip = net.get('PrivateIpAddress')
                         if ins.get('Tags'):
                             for tag in ins['Tags']:
                                 if tag['Key'] == 'Name':
                                     name = tag['Value']
-                print("Host: "+name+" ip: "+host_ip)                    
+				    if name != 'm-v4-fca-latam-app':
+				       host_ip = net.get('PrivateIpAddress')
                 pem = keypath+keyname+'.pem'
                 if not host_ip in checked:
+		    print("Host: "+name+" ip: "+host_ip)
                     try:
                         k = paramiko.RSAKey.from_private_key_file(pem)
                         username_host=['ubuntu','centos','ec2-user','admin','root']
