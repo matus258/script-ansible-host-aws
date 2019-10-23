@@ -16,19 +16,21 @@ apath =''
 keypath=''
 name =''
 akid=''
+region=''
 secret=''
 all_hosts = False
 pm = 0
 no_host =[]
+autoscaling = []
 exist_host=False
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"hp:k:ti:a:s:",["anspath=","keypath=","all=","ip=","akid=","secret="])
+    opts, args = getopt.getopt(sys.argv[1:],"hp:k:r:ti:a:s:",["anspath=","keypath=","region=","all=","ip=","akid=","secret="])
 except Exception as e:
     print(e)
     sys.exit(1)
 for opt, arg in opts:
     if opt == '-h':
-        print('para todos os hosts: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -a "akid" -s "aksecret" -t \n para hosts especificos: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -a "akid" -s "aksecret" -i "host-ip1,host-ip2"')
+        print('para todos os hosts: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -r "region" -a "akid" -s "aksecret" -t \n para hosts especificos: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -r "region" -a "akid" -s "aksecret" -i "host-ip1,host-ip2"')
         sys.exit()
     elif opt in ('-p', '--anspath'):
         apath = arg
@@ -38,6 +40,9 @@ for opt, arg in opts:
         pm += 1
     elif opt in ('-t','--all'):
         all_hosts = True
+        pm += 1
+    elif opt in ('-r','--region'):
+        region = arg
         pm += 1
     elif opt in ('-i','--ip'):
         pm += 1
@@ -50,16 +55,15 @@ for opt, arg in opts:
     elif opt in ('-s','--secret'):
         secret = arg
         pm += 1
-if pm != 5:
-    print('para todos os hosts: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -a "akid" -s "aksecret" -t \n para hosts especificos: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -a "akid" -s "aksecret" -i "host-ip1,host-ip2"')
+if pm != 6:
+    print('para todos os hosts: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -r "region" -a "akid" -s "aksecret" -t \n para hosts especificos: \n test.py -p "/caminho/para/playbook" -k "/caminho/para/pem" -r "region" -a "akid" -s "aksecret" -i "host-ip1,host-ip2"')
     sys.exit(1)
 
 with open(apath+'hosts', 'w') as f:
 	w = f.write("")
-ec2 = boto3.client('ec2', region_name='us-east-1', aws_access_key_id=akid,
+ec2 = boto3.client('ec2', region_name=region, aws_access_key_id=akid,
     aws_secret_access_key=secret)
 response = ec2.describe_instances()
-
 if all_hosts:
     for res in response['Reservations']:
         for ins in res['Instances']:
